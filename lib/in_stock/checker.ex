@@ -1,7 +1,11 @@
 defmodule InStock.Checker do
   use GenServer
-  require Logger
   alias InStock.Checker.StoreChecker
+  require Logger
+
+  @time :timer.minutes(5)
+
+  # Public API
 
   def start_link(store_id) do
     GenServer.start_link(__MODULE__, store_id)
@@ -14,15 +18,18 @@ defmodule InStock.Checker do
   end
 
   def handle_continue(:initial_timer, state) do
-    timer = Process.send_after(self(), :tick, 5000)
-    {:noreply, %{state | timer: timer}}
+    check_and_schedule(@time, state)
   end
 
-  def handle_info(:tick, %{timer: timer, store_id: store_id} = state) do
+  def handle_info(:tick, state) do
+    check_and_schedule(@time, state)
+  end
+
+  # Utility
+
+  defp check_and_schedule(milliseconds, %{store_id: store_id} = state) do
     check_store(store_id)
-    Process.cancel_timer(timer)
-    timer = Process.send_after(self(), :tick, 5000)
-    {:noreply, %{state | timer: timer}}
+    {:noreply, %{state | timer: Process.send_after(self(), :tick, milliseconds)}}
   end
 
   defp check_store(store_id) do
