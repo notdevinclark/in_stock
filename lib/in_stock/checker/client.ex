@@ -1,4 +1,4 @@
-defmodule InStock.Client do
+defmodule InStock.Checker.Client do
   @moduledoc """
   Makes HTTP requests, supports compression
   """
