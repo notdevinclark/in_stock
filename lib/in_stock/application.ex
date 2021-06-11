@@ -14,13 +14,14 @@ defmodule InStock.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: InStock.PubSub},
       # Start the Endpoint (http/https)
-      InStockWeb.Endpoint
+      InStockWeb.Endpoint,
       # Start a worker by calling: InStock.Worker.start_link(arg)
       # {InStock.Worker, arg}
+      InStock.Checker.CheckerSupervisor
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
+    # for other strategies and supported option
     opts = [strategy: :one_for_one, name: InStock.Supervisor]
     Supervisor.start_link(children, opts)
   end

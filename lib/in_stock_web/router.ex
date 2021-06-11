@@ -18,6 +18,13 @@ defmodule InStockWeb.Router do
     pipe_through :browser
 
     live "/", PageLive, :index
+
+    live "/stores", StoreLive.Index, :index
+    live "/stores/new", StoreLive.Index, :new
+    live "/stores/:id/edit", StoreLive.Index, :edit
+
+    live "/stores/:id", StoreLive.Show, :show
+    live "/stores/:id/show/edit", StoreLive.Show, :edit
   end
 
   # Other scopes may use custom stacks.

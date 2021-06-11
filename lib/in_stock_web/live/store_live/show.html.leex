@@ -1,0 +1,42 @@
+<h1>Show Store</h1>
+
+<%= if @live_action in [:edit] do %>
+  <%= live_modal @socket, InStockWeb.StoreLive.FormComponent,
+    id: @store.id,
+    title: @page_title,
+    action: @live_action,
+    store: @store,
+    return_to: Routes.store_show_path(@socket, :show, @store) %>
+<% end %>
+
+<ul>
+
+  <li>
+    <strong>Name:</strong>
+    <%= @store.name %>
+  </li>
+
+  <li>
+    <strong>Url:</strong>
+    <%= @store.url %>
+  </li>
+
+  <li>
+    <strong>Stock selector:</strong>
+    <%= @store.stock_selector %>
+  </li>
+
+  <li>
+    <strong>Stock matcher:</strong>
+    <%= @store.stock_matcher %>
+  </li>
+
+  <li>
+    <strong>Price selector:</strong>
+    <%= @store.price_selector %>
+  </li>
+
+</ul>
+
+<span><%= live_patch "Edit", to: Routes.store_show_path(@socket, :edit, @store), class: "button" %></span>
+<span><%= live_redirect "Back", to: Routes.store_index_path(@socket, :index) %></span>
