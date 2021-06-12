@@ -7,6 +7,7 @@ defmodule InStock.Stores do
   alias InStock.Repo
 
   alias InStock.Stores.Store
+  alias InStock.Stores.StoreStatus
 
   @doc """
   Returns the list of stores.
@@ -19,6 +20,7 @@ defmodule InStock.Stores do
   """
   def list_stores do
     Repo.all(Store)
+    |> Repo.preload(:store_status)
   end
 
   @doc """
@@ -35,7 +37,7 @@ defmodule InStock.Stores do
       ** (Ecto.NoResultsError)
 
   """
-  def get_store!(id), do: Repo.get!(Store, id)
+  def get_store!(id), do: Repo.get!(Store, id) |> Repo.preload(:store_status)
 
   @doc """
   Creates a store.
@@ -50,9 +52,22 @@ defmodule InStock.Stores do
 
   """
   def create_store(attrs \\ %{}) do
-    %Store{}
-    |> Store.changeset(attrs)
-    |> Repo.insert()
+    result =
+      %Store{}
+      |> Store.changeset(attrs)
+      |> Repo.insert()
+
+    case result do
+      {:ok, store} ->
+        %StoreStatus{}
+        |> StoreStatus.changeset(%{store_id: store.id})
+        |> Repo.insert()
+
+      {:error, _change_set} ->
+        :noop
+    end
+
+    result
   end
 
   @doc """
@@ -100,5 +115,25 @@ defmodule InStock.Stores do
   """
   def change_store(%Store{} = store, attrs \\ %{}) do
     Store.changeset(store, attrs)
+  end
+
+  ### StoreStatus Functions
+
+  @doc """
+  Updates a store_status.
+
+  ## Examples
+
+      iex> update_store_status(store_status, %{field: new_value})
+      {:ok, %StoreStatus{}}
+
+      iex> update_store_status(store_status, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_store_status(%StoreStatus{} = store_status, attrs) do
+    store_status
+    |> StoreStatus.changeset(attrs)
+    |> Repo.update()
   end
 end

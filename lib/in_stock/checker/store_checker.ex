@@ -17,15 +17,16 @@ defmodule InStock.Checker.StoreChecker do
     Logger.info(message: "Checking Store", name: store.name, id: store_id)
 
     matcher = Regex.compile!(store.stock_matcher)
-    # TODO: validate matcher in the http form
 
-    with {:ok, document} <- get_document(store.url) do
-      stock_status = get_stock_status(document, store.stock_selector, matcher)
-      price = get_price(document, store.price_selector)
+    case get_document(store.url) do
+      {:ok, document} ->
+        stock_status = get_stock_status(document, store.stock_selector, matcher)
+        price = get_price(document, store.price_selector)
 
-      {store.name, stock_status, price}
-    else
-      error -> {:error, store.name, "Parse Error: #{inspect(error)}"}
+        Stores.update_store_status(store.store_status, %{available: stock_status, price: price})
+
+      error ->
+        {:error, store.name, "Parse Error: #{inspect(error)}"}
     end
   end
 
@@ -42,10 +43,7 @@ defmodule InStock.Checker.StoreChecker do
       |> Floki.text()
       |> String.downcase()
 
-    cond do
-      String.match?(text, stock_matcher) -> :sold_out
-      :any_other -> :in_stock
-    end
+    not String.match?(text, stock_matcher)
   end
 
   defp get_price(document, price_selector) do

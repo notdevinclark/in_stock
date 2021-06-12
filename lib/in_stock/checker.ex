@@ -28,14 +28,7 @@ defmodule InStock.Checker do
   # Utility
 
   defp check_and_schedule(milliseconds, %{store_id: store_id} = state) do
-    check_store(store_id)
+    StoreChecker.check(store_id)
     {:noreply, %{state | timer: Process.send_after(self(), :tick, milliseconds)}}
-  end
-
-  defp check_store(store_id) do
-    case StoreChecker.check(store_id) do
-      {:error, name, message} -> Logger.info(store: name, error: message)
-      {name, status, price} -> Logger.info(store: name, status: status, price: price)
-    end
   end
 end
